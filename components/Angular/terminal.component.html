@@ -1,15 +1,13 @@
-<!-- src/app/terminal/terminal.component.html -->
-<div>
-    <div style="background-color: #000; color: #fff; min-height: 200px; padding: 16px;">
-      <pre>{{ output }}</pre>
-    </div>
-    <form (submit)="onCommandSubmit($event)">
-      <input
-        type="text"
-        [(ngModel)]="command"
-        (ngModelChange)="onCommandChange($event)"
-        style="width: 100%; margin-top: 8px;"
-        placeholder="Enter command"
-      />
-    </form>
+<div class="terminal">
+  <h3>Terminal</h3>
+  <div
+    #terminalOutput
+    class="terminal-output"
+    contenteditable="true"
+    (contextmenu)="copyText($event)"
+    (keydown)="sendKeyInput($event)"
+  >
+    <pre *ngFor="let line of outputLines">{{ line }}</pre>
+    <pre class="terminal-prompt">> <span>{{ currentCommand }}</span><span class="blinking-cursor">|</span></pre>
   </div>
+</div>

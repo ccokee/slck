@@ -1,52 +1,152 @@
 <template>
-  <v-card class="terminal">
-    <v-card-text>
-      <div class="output" ref="output"></div>
-      <v-text-field
-        ref="input"
-        solo
-        hide-details
-        label="Enter command"
-        @keydown.enter="sendCommand"
-      ></v-text-field>
-    </v-card-text>
-  </v-card>
+  <div class="terminal">
+    <h3>Terminal</h3>
+    <div
+      ref="terminalOutput"
+      class="terminal-output"
+      @contextmenu.prevent="copyText"
+      @keydown="sendKeyInput"
+      contenteditable
+    >
+      <pre v-for="(line, index) in outputLines" :key="index">{{ line }}</pre>
+      <pre
+        class="terminal-prompt"
+      >> <span>{{ currentCommand }}</span><span class="blinking-cursor">|</span></pre>
+    </div>
+  </div>
 </template>
 
 <script>
+import { ref, onMounted, onUnmounted } from "vue";
+
 export default {
-  data() {
-    return {
-      socket: null,
-    };
-  },
-  mounted() {
-    this.connectSocket();
-  },
-  beforeDestroy() {
-    if (this.socket) {
-      this.socket.close();
-    }
-  },
-  methods: {
-    connectSocket() {
-      this.socket = new WebSocket('wss://odin-shell-mod:10443/ws/terminal/');
-      this.socket.addEventListener('message', (event) => {
+  setup() {
+    const websocket = ref(null);
+    const isReady = ref(false);
+    const outputLines = ref([]);
+    const currentCommand = ref("");
+    const terminalOutput = ref(null);
+
+    onMounted(() => {
+      const ws = new WebSocket("ws://localhost:8000/ws/terminal/");
+      ws.onopen = () => {
+        isReady.value = true;
+      };
+      ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        this.$refs.output.innerHTML += `<pre>${data.output}</pre>`;
-      });
-    },
-    sendCommand() {
-      const command = this.$refs.input.value;
-      this.socket.send(JSON.stringify({ command: command }));
-      this.$refs.input.value = '';
-    },
+        if (data.type === "output" || data.type === "error") {
+          outputLines.value.push(data.message);
+        }
+      };
+      ws.onclose = () => {
+        isReady.value = false;
+      };
+      websocket.value = ws;
+    });
+
+    onUnmounted(() => {
+      if (websocket.value) {
+        websocket.value.close();
+      }
+    });
+
+    const sendKeyInput = (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+
+        // Split the input into command and arguments
+        const input = currentCommand.value.trim().split(/\s+/);
+        const command = input.shift();
+        const args = input;
+
+        // Send the command and its arguments
+        sendCommand(command, args);
+
+        // Clear the currentCommand
+        currentCommand.value = "";
+      } else if (isReady.value && websocket.value) {
+        websocket.value.send(
+          JSON.stringify({
+            type: "key_input",
+            key_input: event.key,
+          })
+        );
+      }
+    };
+
+    const copyText = (event) => {
+      const selection = window.getSelection();
+      const selectedText = selection.toString();
+
+      if (selectedText.length > 0) {
+        navigator.clipboard.writeText(selectedText).then(
+          () => {
+            console.log("Text copied to clipboard");
+          },
+          (err) => {
+            console.error("Error copying text: ", err);
+          }
+        );
+      }
+    };
+    const sendCommand = (command, args) => {
+      if (isReady.value && websocket.value) {
+        websocket.value.send(
+          JSON.stringify({
+            type: "command",
+            command: command,
+            args: args,
+          })
+        );
+      }
+    };
+    return {
+      terminalOutput,
+      isReady,
+      outputLines,
+      currentCommand,
+      sendKeyInput,
+      copyText,
+    };
   },
 };
 </script>
 
-<style scoped>
+<style>
 .terminal {
-  /* Add any custom styles for the terminal component */
+  width: 100%;
+  height: 100%;
+}
+
+.terminal-output {
+  overflow: auto;
+  height: calc(
+    100% - 56px
+  ); /* Adjust the height based on the space for the input and title */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.terminal-output:focus {
+  outline: none;
+  caret-color: black;
+}
+
+.terminal-prompt {
+  display: inline;
+}
+
+.blinking-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from,
+  to {
+    color: transparent;
+  }
+  50% {
+    color: black;
+  }
 }
 </style>

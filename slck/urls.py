@@ -19,6 +19,5 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('available-commands/', views.available_commands, name='available-commands'),
-    path('terminal/', include('slck.urls')),
+    path('list_commands/', views.list_commands, name='list_commands'),
 ]

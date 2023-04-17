@@ -1,4 +1,3 @@
-# terminal_app/consumers.py
 import json
 import os
 import subprocess
@@ -7,46 +6,51 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class TerminalConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.process = None
         await self.accept()
 
     async def disconnect(self, close_code):
-        pass
+        if self.process and not self.process.poll():
+            self.process.terminate()
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        command = text_data_json['command']
+        message_type = text_data_json.get('type')
 
-        # Split the command and arguments using shlex
-        cmd_parts = shlex.split(command)
+        if message_type == 'execute_command':
+            command = text_data_json.get('command')
+            args = text_data_json.get('args', [])
 
-        # Validate that the command is in the /bin folder
-        command_path = os.path.join('/bin', cmd_parts[0])
-        if not os.path.exists(command_path):
-            await self.send(json.dumps({'output': 'Command not found in /bin'}))
+            await self.execute_command(command, *args)
+        elif message_type == 'key_input':
+            key_input = text_data_json.get('key_input')
+            if self.process and not self.process.poll():
+                os.write(self.process.stdin.fileno(), key_input.encode())
+
+    async def execute_command(self, command, *args):
+        if self.process and not self.process.poll():
+            await self.send_error('A command is already running.')
             return
 
-        # Update the command to use the /bin folder and include the parameters
-        secure_command = [command_path] + cmd_parts[1:]
+        cmd = os.path.join('/bin', command)
+        if not os.path.isfile(cmd):
+            await self.send_error(f"Command '{command}' not found.")
+            return
 
-        output = await self.run_command(secure_command)
-        await self.send(json.dumps({'output': output}))
+        cmd_with_args = shlex.split(cmd) + list(args)
+        self.process = subprocess.Popen(cmd_with_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    async def run_command(self, command):
-        process = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=False,
-            text=True,
-            bufsize=1,
-            close_fds=True
-        )
-        output = ''
-        while True:
-            line = process.stdout.readline()
-            if not line:
-                break
-            output += line
-        process.stdout.close()
+        while self.process.poll() is None:
+            stdout_line = self.process.stdout.readline().decode()
+            if stdout_line:
+                await self.send_output(stdout_line)
 
-        return output
+            stderr_line = self.process.stderr.readline().decode()
+            if stderr_line:
+                await self.send_error(stderr_line)
+
+    async def send_output(self, message):
+        await self.send(json.dumps({'type': 'output', 'message': message}))
+
+    async def send_error(self, message):
+        await self.send(json.dumps({'type': 'error', 'message': message}))
