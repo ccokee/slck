@@ -1,0 +1,15 @@
+<!-- src/app/terminal/terminal.component.html -->
+<div>
+    <div style="background-color: #000; color: #fff; min-height: 200px; padding: 16px;">
+      <pre>{{ output }}</pre>
+    </div>
+    <form (submit)="onCommandSubmit($event)">
+      <input
+        type="text"
+        [(ngModel)]="command"
+        (ngModelChange)="onCommandChange($event)"
+        style="width: 100%; margin-top: 8px;"
+        placeholder="Enter command"
+      />
+    </form>
+  </div>

@@ -1,0 +1,8 @@
+Django
+channels
+channels-redis
+daphne
+asgiref
+uvicorn
+subprocess
+shlex
