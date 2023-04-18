@@ -1,0 +1,28 @@
+replicaCount: 1
+
+image:
+  repository: ccokee/slck:k9s
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: LoadBalancer
+  port: 10443
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

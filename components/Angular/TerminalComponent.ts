@@ -9,7 +9,7 @@ export class TerminalComponentComponent implements OnInit, OnDestroy {
   websocket: WebSocket;
   isReady = false;
   outputLines: string[] = [];
-  currentCommand = '';
+  currentCommand: string = '';
 
   @ViewChild('terminalOutput') terminalOutput: ElementRef;
 
@@ -56,8 +56,10 @@ export class TerminalComponentComponent implements OnInit, OnDestroy {
       const command = input.shift();
       const args = input;
   
-      // Send the command and its arguments
-      this.sendCommand(command, args);
+      // Send the command and its arguments if the command is not undefined
+      if (command) {
+        this.sendCommand(command, args);
+      }
   
       // Clear the currentCommand
       this.currentCommand = "";
@@ -74,8 +76,10 @@ export class TerminalComponentComponent implements OnInit, OnDestroy {
   copyText(event: MouseEvent): void {
     event.preventDefault();
     const selection = window.getSelection();
+    const selectedText = '';
+    if (selection !== null) {
     const selectedText = selection.toString();
-
+    }
     if (selectedText.length > 0) {
       navigator.clipboard.writeText(selectedText).then(
         () => {
