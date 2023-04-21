@@ -18,6 +18,7 @@
 
 <script>
 import { ref, onMounted, onUnmounted } from "vue";
+import { SLCK_BACKEND_URL } from "@/config";
 
 export default {
   setup() {
@@ -28,7 +29,7 @@ export default {
     const terminalOutput = ref(null);
 
     onMounted(() => {
-      const ws = new WebSocket("ws://localhost:8000/ws/terminal/");
+      const ws = new WebSocket(`${SLCK_BACKEND_URL}/ws/terminal/`);
       ws.onopen = () => {
         isReady.value = true;
       };
@@ -107,6 +108,11 @@ export default {
       currentCommand,
       sendKeyInput,
       copyText,
+      websocket: null,
+      isReady: false,
+      outputLines: [],
+      currentCommand: "",
+      terminalOutput: null,
     };
   },
 };

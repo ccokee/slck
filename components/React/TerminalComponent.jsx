@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./TerminalComponent.css";
+import { SLCK_BACKEND_URL } from "./config";
 
 const TerminalComponent = () => {
   const [websocket, setWebsocket] = useState(null);
@@ -9,7 +10,7 @@ const TerminalComponent = () => {
   const terminalOutputRef = useRef();
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws/terminal/");
+    const ws = new WebSocket(`${SLCK_BACKEND_URL}/ws/terminal/`);
     ws.onopen = () => {
       setIsReady(true);
     };
