@@ -62,7 +62,7 @@ COPY --from=cert_builder /etc/letsencrypt/live/$DOMAIN/privkey.pem /etc/letsencr
 COPY --from=base /bin /bin
 
 # Expose the port for the Django app to run on
-EXPOSE 10443
+EXPOSE 9443
 
 # Run the server
-CMD ["uvicorn", "slck.asgi:application", "--host", "0.0.0.0", "--port", "10443", "--ssl-keyfile", "/etc/letsencrypt/live/$DOMAIN/privkey.pem", "--ssl-certfile", "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"]
+CMD ["uvicorn", "slck.asgi:application", "--host", "0.0.0.0", "--port", "9443", "--ssl-keyfile", "/etc/letsencrypt/live/$DOMAIN/privkey.pem", "--ssl-certfile", "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"]
