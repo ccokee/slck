@@ -28,6 +28,7 @@ RUN apk update \
     musl-dev \
     gettext \
     redis \
+    openssl \
     && rm -rf /var/cache/apk/*
 
 COPY requirements.txt .
