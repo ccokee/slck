@@ -14,6 +14,8 @@ from pathlib import Path
 import os
 
 COMMAND_DIRS = os.environ.get("COMMAND_DIRS", "/bin").split(";")
+REDIS_HOST = os.environ.get('SLCK_REDIS_SERVICE', '127.0.0.1')
+REDIS_PORT = int(os.environ.get('SLCK_REDIS_PORT', 6379))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -132,7 +134,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [(REDIS_HOST, REDIS_PORT)],
         },
     },
 }
