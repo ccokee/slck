@@ -1,4 +1,4 @@
-# Dockerfile
+FROM python:3.9-alpine as base
 # Add build arguments for Redis host and port
 ARG SLCK_REDIS_SERVICE=127.0.0.1
 ARG SLCK_REDIS_PORT=6379
@@ -10,9 +10,6 @@ ENV SLCK_REDIS_SERVICE=${SLCK_REDIS_SERVICE}
 ENV SLCK_REDIS_PORT=${SLCK_REDIS_PORT}
 ENV DOMAIN=${DOMAIN}
 ENV EMAIL=${EMAIL}
-
-# Use the latest Alpine-based Python image
-FROM python:3.9-alpine as base
 
 # Set the working directory
 WORKDIR /app
