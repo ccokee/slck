@@ -1,4 +1,15 @@
 # Dockerfile
+# Add build arguments for Redis host and port
+ARG SLCK_REDIS_SERVICE=127.0.0.1
+ARG SLCK_REDIS_PORT=6379
+ARG DOMAIN="localhost"
+ARG EMAIL="admin@localhost"
+
+# Set the environment variables from build arguments
+ENV SLCK_REDIS_SERVICE=${SLCK_REDIS_SERVICE}
+ENV SLCK_REDIS_PORT=${SLCK_REDIS_PORT}
+ENV DOMAIN=${DOMAIN}
+ENV EMAIL=${EMAIL}
 
 # Use the latest Alpine-based Python image
 FROM python:3.9-alpine as base
@@ -60,6 +71,10 @@ COPY --from=cert_builder /etc/letsencrypt/live/$DOMAIN/privkey.pem /etc/letsencr
 
 # Copy the /bin folder from the base stage
 COPY --from=base /bin /bin
+
+# Set the environment variables from build arguments
+ENV SLCK_REDIS_SERVICE=${SLCK_REDIS_SERVICE}
+ENV SLCK_REDIS_PORT=${SLCK_REDIS_PORT}
 
 # Expose the port for the Django app to run on
 EXPOSE 9443
