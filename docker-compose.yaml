@@ -8,6 +8,8 @@ services:
       args:
         DOMAIN: localhost
         EMAIL: jcurr@unileon.es
+        SLCK_REDIS_HOST: redis
+        SLCK_REDIS_PORT: 6379
     image: your_project_image
     ports:
       - "10443:10443"
