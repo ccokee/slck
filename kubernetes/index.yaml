@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  slck-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-04-21T12:56:05.024085668+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 26b6472ef06b8541b4f24545b9bb2f7d35f2c236f61f489fd7aee33a0ec0de11
+    name: slck-chart
+    type: application
+    urls:
+    - slck-chart-1.tgz
+    version: "1"
+generated: "2023-04-21T12:56:05.023477724+02:00"

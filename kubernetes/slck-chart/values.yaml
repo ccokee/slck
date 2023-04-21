@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: ccokee/slck:k9s
+  repository: ccokee/slck
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: k9s
 
 imagePullSecrets: []
 nameOverride: ""
@@ -26,3 +26,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+redis:
+  service:
+    type: NodePort
+    port: 6379
